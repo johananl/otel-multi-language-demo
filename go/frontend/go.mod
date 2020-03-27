@@ -11,8 +11,8 @@ require (
 	google.golang.org/grpc v1.24.0
 )
 
-replace (
-	github.com/johananl/otel-multi-language-demo/go/field => ../field
-	github.com/johananl/otel-multi-language-demo/go/role => ../role
-	github.com/johananl/otel-multi-language-demo/go/seniority => ../seniority
-)
+// replace (
+// 	github.com/johananl/otel-multi-language-demo/go/field => ../field
+// 	github.com/johananl/otel-multi-language-demo/go/role => ../role
+// 	github.com/johananl/otel-multi-language-demo/go/seniority => ../seniority
+// )

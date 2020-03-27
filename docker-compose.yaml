@@ -7,36 +7,28 @@ services:
     ports:
     - 16686:16686
   seniority:
-    build:
-      context: ./go
-      dockerfile: ./docker/Dockerfile-seniority
+    build: go/seniority
     depends_on:
     - jaeger
     environment:
       SENIORITY_HOST: 0.0.0.0
       SENIORITY_JAEGER_HOST: jaeger
   field:
-    build:
-      context: ./go
-      dockerfile: docker/Dockerfile-field
+    build: go/field
     depends_on:
     - jaeger
     environment:
       FIELD_HOST: 0.0.0.0
       FIELD_JAEGER_HOST: jaeger
   role:
-    build:
-      context: ./go
-      dockerfile: docker/Dockerfile-role
+    build: go/role
     depends_on:
     - jaeger
     environment:
       ROLE_HOST: 0.0.0.0
       ROLE_JAEGER_HOST: jaeger
   frontend:
-    build:
-      context: ./go
-      dockerfile: docker/Dockerfile-frontend
+    build: go/frontend
     depends_on:
     - jaeger
     - seniority
