@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package seniority;
+
+service Seniority {
+  rpc GetSeniority (SeniorityRequest) returns (SeniorityReply) {}
+}
+
+message SeniorityRequest {
+  bool slow = 1;
+}
+
+message SeniorityReply {
+  string seniority = 1;
+}
