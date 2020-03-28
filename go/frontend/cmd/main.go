@@ -238,10 +238,6 @@ func main() {
 		w.Write(j)
 	}
 
-	// Handle static content (for UI).
-	fs := http.FileServer(http.Dir("ui/build"))
-	http.Handle("/", fs)
-
 	// Handle API.
 	http.HandleFunc("/api", apiHandler)
 
