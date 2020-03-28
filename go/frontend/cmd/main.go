@@ -16,7 +16,7 @@ import (
 	"go.opentelemetry.io/otel/api/core"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/key"
-	"go.opentelemetry.io/otel/exporter/trace/jaeger"
+	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
 )
@@ -27,9 +27,8 @@ type Response struct {
 	Role      string `json:"role"`
 }
 
-func initTraceProvider(jaegerHost, jaegerPort string) {
-	// Create a Jaeger exporter.
-	exporter, err := jaeger.NewExporter(
+func initTraceProvider(jaegerHost, jaegerPort string) func() {
+	_, flush, err := jaeger.NewExportPipeline(
 		jaeger.WithCollectorEndpoint(fmt.Sprintf("http://%s:%s/api/traces", jaegerHost, jaegerPort)),
 		jaeger.WithProcess(jaeger.Process{
 			ServiceName: "frontend",
@@ -37,23 +36,16 @@ func initTraceProvider(jaegerHost, jaegerPort string) {
 				key.String("exporter", "jaeger"),
 			},
 		}),
+		jaeger.RegisterAsGlobal(),
+		jaeger.WithSDK(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Create a trace provider.
-	// The provider creates a tracer and plugs in the exporter to it.
-	tp, err := sdktrace.NewProvider(
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithSyncer(exporter),
-	)
-	if err != nil {
-		log.Fatal(err)
+	return func() {
+		flush()
 	}
-
-	// Register the trace provider.
-	global.SetTraceProvider(tp)
 }
 
 func getenv(key, fallback string) string {
@@ -82,7 +74,7 @@ func main() {
 	rolePort := getenv("FRONTEND_ROLE_PORT", "9092")
 
 	initTraceProvider(jaegerHost, jaegerPort)
-	tr := global.TraceProvider().Tracer("frontend")
+	tr := global.Tracer("frontend")
 
 	// Connect to seniority service.
 	sConn, err := grpc.Dial(
