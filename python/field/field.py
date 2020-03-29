@@ -25,7 +25,6 @@ fields = [
 ]
 
 class Field(field_pb2_grpc.FieldServicer):
-
     def GetField(self, request, context):
         print('Received field request')
         selected = fields[random.randint(0, len(fields)-1)]
