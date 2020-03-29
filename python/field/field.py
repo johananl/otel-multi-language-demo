@@ -10,6 +10,7 @@ import field_pb2_grpc
 class Field(field_pb2_grpc.FieldServicer):
 
     def GetField(self, request, context):
+        print('Received field request')
         return field_pb2.FieldReply()
 
 
