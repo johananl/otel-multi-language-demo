@@ -129,6 +129,8 @@ func main() {
 		if slow != "" {
 			// Handle request slowly.
 
+			span.SetAttributes(key.Bool("slow", true))
+
 			// Get seniority.
 			sr, err := seniorityClient.GetSeniority(ctx, &senioritypb.SeniorityRequest{Slow: true})
 			if err != nil {
