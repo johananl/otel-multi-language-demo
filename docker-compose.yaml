@@ -14,7 +14,7 @@ services:
       SENIORITY_HOST: 0.0.0.0
       SENIORITY_JAEGER_HOST: jaeger
   field:
-    build: go/field
+    build: python/field
     depends_on:
     - jaeger
     environment:
