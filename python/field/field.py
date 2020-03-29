@@ -1,18 +1,35 @@
 from concurrent import futures
 import logging
+import random
 
 import grpc
 
 import field_pb2
 import field_pb2_grpc
 
+fields = [
+    "marketing",
+	"dolphin",
+	"cat",
+	"penguin",
+	"engineering",
+	"aerospace",
+	"machinery",
+	"finance",
+	"strategy",
+	"beer",
+	"coffee",
+	"whisky",
+	"laundry",
+	"socks",
+]
 
 class Field(field_pb2_grpc.FieldServicer):
 
     def GetField(self, request, context):
         print('Received field request')
-        # TODO: Implement random choice.
-        return field_pb2.FieldReply(field='penguin')
+        selected = fields[random.randint(0, len(fields)-1)]
+        return field_pb2.FieldReply(field=selected)
 
 
 def serve():
