@@ -6,4 +6,4 @@ COPY . /code
 WORKDIR /code
 
 EXPOSE 9091
-CMD python field.py
+CMD ["python",  "field.py"]
