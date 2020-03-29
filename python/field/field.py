@@ -16,7 +16,6 @@ class Field(field_pb2_grpc.FieldServicer):
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    # helloworld_pb2_grpc.add_GreeterServicer_to_server(Greeter(), server)
     field_pb2_grpc.add_FieldServicer_to_server(Field(), server)
     server.add_insecure_port('[::]:9091')
     server.start()
