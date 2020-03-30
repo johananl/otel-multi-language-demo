@@ -40,21 +40,23 @@ type server struct {
 func (s *server) GetSeniority(ctx context.Context, in *pb.SeniorityRequest) (*pb.SeniorityReply, error) {
 	log.Println("Received seniority request")
 
+	// Get current span. The span was created within the gRPC interceptor.
+	// We are just adding data to it here.
+	span := trace.SpanFromContext(ctx)
+
 	if in.Slow {
 		time.Sleep(time.Duration(rand.Intn(300)) * time.Millisecond)
 	}
 	if in.Unreliable {
-		// Return an error 50% of the time.
-		if rand.Intn(2) > 0 {
+		// Return an error 10% of the time.
+		if rand.Intn(10) == 0 {
+			span.SetStatus(500, "Random error")
 			return nil, errors.New("random error")
 		}
 
 	}
 	selected := seniorities[rand.Intn(len(seniorities))]
 
-	// Get current span. The span was created within the gRPC interceptor.
-	// We are just adding data to it here.
-	span := trace.SpanFromContext(ctx)
 	span.AddEvent(ctx, "Selected seniority", key.New("seniority").String(selected))
 
 	return &pb.SeniorityReply{Seniority: selected}, nil
