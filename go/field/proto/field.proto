@@ -8,6 +8,7 @@ service Field {
 
 message FieldRequest {
   bool slow = 1;
+  bool unreliable = 2;
 }
 
 message FieldReply {

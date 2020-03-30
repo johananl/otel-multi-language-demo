@@ -8,6 +8,7 @@ service Seniority {
 
 message SeniorityRequest {
   bool slow = 1;
+  bool unreliable = 2;
 }
 
 message SeniorityReply {

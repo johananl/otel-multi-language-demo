@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -41,6 +42,13 @@ func (s *server) GetSeniority(ctx context.Context, in *pb.SeniorityRequest) (*pb
 
 	if in.Slow {
 		time.Sleep(time.Duration(rand.Intn(300)) * time.Millisecond)
+	}
+	if in.Unreliable {
+		// Return an error 50% of the time.
+		if rand.Intn(2) > 0 {
+			return nil, errors.New("random error")
+		}
+
 	}
 	selected := seniorities[rand.Intn(len(seniorities))]
 

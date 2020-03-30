@@ -8,6 +8,7 @@ service Role {
 
 message RoleRequest {
   bool slow = 1;
+  bool unreliable = 2;
 }
 
 message RoleReply {
