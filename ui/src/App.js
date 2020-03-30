@@ -11,6 +11,12 @@ class Display extends React.Component {
       );
     } else if (!this.props.data) {
       return (<h1>&nbsp;</h1>);
+    } else if (this.props.error) {
+      return (
+        <div class="alert alert-danger" role="alert">
+          Uh oh!
+        </div>
+      );
     } else {
       // Capitalize first letter of each word.
       const seniority = this.props.data.seniority.charAt(0).toUpperCase()
@@ -43,8 +49,19 @@ class SlowButton extends React.Component {
     return (
       <button
         className="btn btn-primary w-50"
-        onClick={() => this.props.handler(true)}
+        onClick={() => this.props.handler(true, false)}
       >Generate Fake Title Slowly</button>
+    );
+  }
+}
+
+class UnreliableButton extends React.Component {
+  render() {
+    return (
+      <button
+        className="btn btn-primary w-50"
+        onClick={() => this.props.handler(false, true)}
+      >Generate Fake Title Unreliably</button>
     );
   }
 }
@@ -61,10 +78,13 @@ class MyApp extends React.Component {
     this.handler = this.handler.bind(this)
   }
 
-  handler(slow) {
+  handler(slow, unreliable) {
     let url = "http://localhost/api"
     if (slow) {
       url += "?slow=true"
+    }
+    if (unreliable) {
+      url += "?unreliable=true"
     }
 
     this.setState({ isLoaded: false });
@@ -75,6 +95,7 @@ class MyApp extends React.Component {
           this.setState({
             isLoaded: true,
             data: result,
+            error: null,
           });
         },
         (error) => {
@@ -88,23 +109,22 @@ class MyApp extends React.Component {
 
   render() {
     const { error, isLoaded, data } = this.state;
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else {
-      return (
-        <div className="App container pt-5">
-          <div className="display-container">
-            <Display data={data} isLoaded={isLoaded} />
-          </div>
-          <div className="button-container my-1">
-            <Button handler={this.handler} />
-          </div>
-          <div className="button-container my-1">
-            <SlowButton handler={this.handler} />
-          </div>
-        </div >
-      );
-    }
+    return (
+      <div className="App container pt-5">
+        <div className="display-container">
+          <Display error={error} data={data} isLoaded={isLoaded} />
+        </div>
+        <div className="button-container my-1">
+          <Button handler={this.handler} />
+        </div>
+        <div className="button-container my-1">
+          <SlowButton handler={this.handler} />
+        </div>
+        <div className="button-container my-1">
+          <UnreliableButton handler={this.handler} />
+        </div>
+      </div >
+    );
   }
 }
 
