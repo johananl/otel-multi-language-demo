@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='field',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x0b\x66ield.proto\x12\x05\x66ield\"\x1c\n\x0c\x46ieldRequest\x12\x0c\n\x04slow\x18\x01 \x01(\x08\"\x1b\n\nFieldReply\x12\r\n\x05\x66ield\x18\x01 \x01(\t2=\n\x05\x46ield\x12\x34\n\x08GetField\x12\x13.field.FieldRequest\x1a\x11.field.FieldReply\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x0b\x66ield.proto\x12\x05\x66ield\"0\n\x0c\x46ieldRequest\x12\x0c\n\x04slow\x18\x01 \x01(\x08\x12\x12\n\nunreliable\x18\x02 \x01(\x08\"\x1b\n\nFieldReply\x12\r\n\x05\x66ield\x18\x01 \x01(\t2=\n\x05\x46ield\x12\x34\n\x08GetField\x12\x13.field.FieldRequest\x1a\x11.field.FieldReply\"\x00\x62\x06proto3'
 )
 
 
@@ -38,6 +38,13 @@ _FIELDREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='unreliable', full_name='field.FieldRequest.unreliable', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -51,7 +58,7 @@ _FIELDREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=22,
-  serialized_end=50,
+  serialized_end=70,
 )
 
 
@@ -81,8 +88,8 @@ _FIELDREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=52,
-  serialized_end=79,
+  serialized_start=72,
+  serialized_end=99,
 )
 
 DESCRIPTOR.message_types_by_name['FieldRequest'] = _FIELDREQUEST
@@ -111,8 +118,8 @@ _FIELD = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=81,
-  serialized_end=142,
+  serialized_start=101,
+  serialized_end=162,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetField',
