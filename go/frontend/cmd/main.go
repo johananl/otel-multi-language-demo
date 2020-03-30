@@ -73,7 +73,8 @@ func main() {
 	roleHost := getenv("FRONTEND_ROLE_HOST", "localhost")
 	rolePort := getenv("FRONTEND_ROLE_PORT", "9092")
 
-	initTraceProvider(jaegerHost, jaegerPort)
+	fn := initTraceProvider(jaegerHost, jaegerPort)
+	defer fn()
 	tr := global.Tracer("frontend")
 
 	// Connect to seniority service.
