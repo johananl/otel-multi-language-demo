@@ -33,6 +33,8 @@ var roles []string = []string{
 	"consultant",
 	"optimizer",
 	"specialist",
+	"researcher",
+	"scientist",
 }
 
 type server struct {
