@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"time"
 
+	fieldpb "github.com/johananl/otel-multi-language-demo/go/field/proto"
 	"github.com/johananl/otel-multi-language-demo/go/frontend/pkg/tracing"
 	rolepb "github.com/johananl/otel-multi-language-demo/go/role/proto"
 	senioritypb "github.com/johananl/otel-multi-language-demo/go/seniority/proto"
-	fieldpb "github.com/johananl/otel-multi-language-demo/python/field/proto"
 	"go.opentelemetry.io/otel/api/core"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/key"
@@ -127,13 +127,17 @@ func main() {
 		var res Response
 
 		slow := r.URL.Query().Get("slow")
+		var unreliable bool
+		if u, err := strconv.ParseBool(r.URL.Query().Get("unreliable")); err == nil {
+			unreliable = u
+		}
 		if slow != "" {
 			// Handle request slowly.
 
 			span.SetAttributes(key.Bool("slow", true))
 
 			// Get seniority.
-			sr, err := seniorityClient.GetSeniority(ctx, &senioritypb.SeniorityRequest{Slow: true})
+			sr, err := seniorityClient.GetSeniority(ctx, &senioritypb.SeniorityRequest{Slow: true, Unreliable: unreliable})
 			if err != nil {
 				log.Printf("getting seniority: %v", err)
 				http.Error(w, "Error from seniority service", 500)
@@ -172,7 +176,7 @@ func main() {
 			// Get seniority.
 			sChan := make(chan *senioritypb.SeniorityReply)
 			go func(reply chan<- *senioritypb.SeniorityReply, errChan chan<- error) {
-				r, err := seniorityClient.GetSeniority(ctx, &senioritypb.SeniorityRequest{})
+				r, err := seniorityClient.GetSeniority(ctx, &senioritypb.SeniorityRequest{Unreliable: unreliable})
 				if err != nil {
 					errChan <- fmt.Errorf("getting seniority: %v", err)
 					return
@@ -184,7 +188,7 @@ func main() {
 			// Get field.
 			fChan := make(chan *fieldpb.FieldReply)
 			go func(reply chan<- *fieldpb.FieldReply, errChan chan<- error) {
-				r, err := fieldClient.GetField(ctx, &fieldpb.FieldRequest{})
+				r, err := fieldClient.GetField(ctx, &fieldpb.FieldRequest{Unreliable: unreliable})
 				if err != nil {
 					errChan <- fmt.Errorf("getting field: %v", err)
 					return
@@ -196,7 +200,7 @@ func main() {
 			// Get role.
 			rChan := make(chan *rolepb.RoleReply)
 			go func(reply chan<- *rolepb.RoleReply, errChan chan<- error) {
-				r, err := roleClient.GetRole(ctx, &rolepb.RoleRequest{})
+				r, err := roleClient.GetRole(ctx, &rolepb.RoleRequest{Unreliable: unreliable})
 				if err != nil {
 					errChan <- fmt.Errorf("getting role: %v", err)
 					return
@@ -215,6 +219,8 @@ func main() {
 				case rr := <-rChan:
 					role = rr.Role
 				case err := <-errChan:
+					span.AddEvent(ctx, err.Error())
+					span.SetStatus(500, "Error from backend service")
 					log.Printf("gRPC error: %v", err)
 					http.Error(w, "Error from backend service", 500)
 					return
