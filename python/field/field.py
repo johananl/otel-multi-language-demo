@@ -12,8 +12,8 @@ from opentelemetry.ext.grpc.grpcext import intercept_server
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 
-import proto.field_pb2
-import proto.field_pb2_grpc
+import field_pb2
+import field_pb2_grpc
 
 fields = [
     "marketing",
