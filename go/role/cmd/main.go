@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -44,14 +45,23 @@ type server struct {
 func (s *server) GetRole(ctx context.Context, in *pb.RoleRequest) (*pb.RoleReply, error) {
 	log.Println("Received role request")
 
-	if in.Slow {
-		time.Sleep(time.Duration(rand.Intn(300)) * time.Millisecond)
-	}
-	selected := roles[rand.Intn(len(roles))]
-
 	// Get current span. The span was created within the gRPC interceptor.
 	// We are just adding data to it here.
 	span := trace.SpanFromContext(ctx)
+
+	if in.Slow {
+		time.Sleep(time.Duration(rand.Intn(300)) * time.Millisecond)
+	}
+	if in.Unreliable {
+		// Return an error 10% of the time.
+		if rand.Intn(10) == 0 {
+			span.SetStatus(500, "Random error")
+			return nil, errors.New("random error")
+		}
+
+	}
+	selected := roles[rand.Intn(len(roles))]
+
 	span.AddEvent(ctx, "Selected role", key.New("role").String(selected))
 
 	return &pb.RoleReply{Role: selected}, nil
