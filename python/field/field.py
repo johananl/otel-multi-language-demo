@@ -6,6 +6,7 @@ import time
 import grpc
 
 from opentelemetry import trace
+from opentelemetry.trace.status import StatusCanonicalCode
 from opentelemetry.ext import jaeger
 from opentelemetry.ext.grpc import server_interceptor
 from opentelemetry.ext.grpc.grpcext import intercept_server
@@ -47,9 +48,24 @@ class Field(field_pb2_grpc.FieldServicer):
     def GetField(self, request, context):
         log = logging.getLogger()
         log.info('Received field request')
+
+        span = tracer.get_current_span()
+
         if request.slow:
             time.sleep(random.randint(0, 300) / 1000)
+        if request.unreliable:
+            # Return an error 10% of the time.
+            if random.randint(0, 10) == 0:
+                span.set_status(
+                    trace.status.Status(
+                        StatusCanonicalCode.UNAVAILABLE,
+                        'Random error',
+                    )
+                )
+                context.set_code(grpc.StatusCode.UNKNOWN)
+                return field_pb2.FieldReply()
         selected = fields[random.randint(0, len(fields)-1)]
+        span.add_event('Selected field', {'field': selected})
         return field_pb2.FieldReply(field=selected)
 
 
