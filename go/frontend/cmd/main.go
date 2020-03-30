@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"time"
 
-	fieldpb "github.com/johananl/otel-multi-language-demo/go/field/proto"
 	"github.com/johananl/otel-multi-language-demo/go/frontend/pkg/tracing"
 	rolepb "github.com/johananl/otel-multi-language-demo/go/role/proto"
 	senioritypb "github.com/johananl/otel-multi-language-demo/go/seniority/proto"
+	fieldpb "github.com/johananl/otel-multi-language-demo/python/field/proto"
 	"go.opentelemetry.io/otel/api/core"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/key"
