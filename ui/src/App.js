@@ -14,7 +14,7 @@ class Display extends React.Component {
     } else if (this.props.error) {
       return (
         <div class="alert alert-danger" role="alert">
-          Uh oh!
+          No title for you! ☹
         </div>
       );
     } else {
