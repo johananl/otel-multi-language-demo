@@ -13,6 +13,7 @@ func UnaryClientInterceptor(ctx context.Context, method string, req, reply inter
 	requestMetadata, _ := metadata.FromOutgoingContext(ctx)
 	metadataCopy := requestMetadata.Copy()
 
+	// Inject tracing metadata into downstream gRPC request.
 	grpctrace.Inject(ctx, &metadataCopy)
 	ctx = metadata.NewOutgoingContext(ctx, metadataCopy)
 

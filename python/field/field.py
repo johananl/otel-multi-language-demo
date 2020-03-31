@@ -49,6 +49,8 @@ class Field(field_pb2_grpc.FieldServicer):
         log = logging.getLogger()
         log.info('Received field request')
 
+        # Get current span. The span was created within the gRPC interceptor.
+        # We are retrieving it here because we want to add data to it.
         span = tracer.get_current_span()
 
         if request.slow:
@@ -56,6 +58,7 @@ class Field(field_pb2_grpc.FieldServicer):
         if request.unreliable:
             # Return an error 10% of the time.
             if random.randint(0, 10) == 0:
+                # Mark the span as containing an error.
                 span.set_status(
                     trace.status.Status(
                         StatusCanonicalCode.UNAVAILABLE,
@@ -65,7 +68,10 @@ class Field(field_pb2_grpc.FieldServicer):
                 context.set_code(grpc.StatusCode.UNKNOWN)
                 return field_pb2.FieldReply()
         selected = fields[random.randint(0, len(fields)-1)]
+
+        # Log the result on the span.
         span.add_event('Selected field', {'field': selected})
+
         return field_pb2.FieldReply(field=selected)
 
 

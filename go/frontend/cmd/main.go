@@ -73,6 +73,7 @@ func main() {
 	roleHost := getenv("FRONTEND_ROLE_HOST", "localhost")
 	rolePort := getenv("FRONTEND_ROLE_PORT", "9092")
 
+	// Initialize tracing.
 	fn := initTraceProvider(jaegerHost, jaegerPort)
 	defer fn()
 	tr := global.Tracer("frontend")
@@ -118,6 +119,8 @@ func main() {
 
 	// API handler function.
 	apiHandler := func(w http.ResponseWriter, r *http.Request) {
+		// Start a span for handling the HTTP request. End the span when the
+		// handler function returns.
 		ctx, span := tr.Start(r.Context(), "serve-http-request")
 		defer span.End()
 
@@ -134,6 +137,7 @@ func main() {
 		if slow != "" {
 			// Handle request slowly.
 
+			// Tag the span to indicate a slow request.
 			span.SetAttributes(key.Bool("slow", true))
 
 			// Get seniority.
@@ -219,7 +223,9 @@ func main() {
 				case rr := <-rChan:
 					role = rr.Role
 				case err := <-errChan:
+					// Log the error on the span.
 					span.AddEvent(ctx, err.Error())
+					// Mark the span as containing an error.
 					span.SetStatus(500, "Error from backend service")
 					log.Printf("gRPC error: %v", err)
 					http.Error(w, "Error from backend service", 500)

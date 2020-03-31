@@ -46,7 +46,7 @@ func (s *server) GetRole(ctx context.Context, in *pb.RoleRequest) (*pb.RoleReply
 	log.Println("Received role request")
 
 	// Get current span. The span was created within the gRPC interceptor.
-	// We are just adding data to it here.
+	// We are retrieving it here because we want to add data to it.
 	span := trace.SpanFromContext(ctx)
 
 	if in.Slow {
@@ -55,6 +55,7 @@ func (s *server) GetRole(ctx context.Context, in *pb.RoleRequest) (*pb.RoleReply
 	if in.Unreliable {
 		// Return an error 10% of the time.
 		if rand.Intn(10) == 0 {
+			// Mark the span as containing an error.
 			span.SetStatus(500, "Random error")
 			return nil, errors.New("random error")
 		}
@@ -62,6 +63,7 @@ func (s *server) GetRole(ctx context.Context, in *pb.RoleRequest) (*pb.RoleReply
 	}
 	selected := roles[rand.Intn(len(roles))]
 
+	// Log the result on the span.
 	span.AddEvent(ctx, "Selected role", key.New("role").String(selected))
 
 	return &pb.RoleReply{Role: selected}, nil
@@ -105,7 +107,9 @@ func main() {
 	jaegerHost := getenv("ROLE_JAEGER_HOST", "localhost")
 	jaegerPort := getenv("ROLE_JAEGER_PORT", "14268")
 
-	initTraceProvider(jaegerHost, jaegerPort)
+	// Initialize tracing.
+	fn := initTraceProvider(jaegerHost, jaegerPort)
+	defer fn()
 
 	addr := fmt.Sprintf("%s:%s", host, port)
 

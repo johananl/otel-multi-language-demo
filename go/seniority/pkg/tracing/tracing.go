@@ -9,7 +9,6 @@ import (
 	"go.opentelemetry.io/otel/plugin/grpctrace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 // UnaryServerInterceptor intercepts and extracts incoming trace data.
@@ -17,11 +16,13 @@ func UnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.Una
 	requestMetadata, _ := metadata.FromIncomingContext(ctx)
 	metadataCopy := requestMetadata.Copy()
 
+	// Extract trace and span info from the incoming request.
 	entries, spanCtx := grpctrace.Extract(ctx, &metadataCopy)
 	ctx = correlation.ContextWithMap(ctx, correlation.NewMap(correlation.MapUpdate{
 		MultiKV: entries,
 	}))
 
+	// Start a span for the gRPC request. End the span when the handler function returns.
 	tr := global.Tracer("seniority")
 	ctx, span := tr.Start(
 		trace.ContextWithRemoteSpanContext(ctx, spanCtx),
@@ -31,12 +32,4 @@ func UnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.Una
 	defer span.End()
 
 	return handler(ctx, req)
-}
-
-func setTraceStatus(ctx context.Context, err error) {
-	if err != nil {
-		s, _ := status.FromError(err)
-		trace.SpanFromContext(ctx).AddEvent(ctx, err.Error())
-		trace.SpanFromContext(ctx).SetStatus(s.Code(), s.Message())
-	}
 }

@@ -41,7 +41,7 @@ func (s *server) GetSeniority(ctx context.Context, in *pb.SeniorityRequest) (*pb
 	log.Println("Received seniority request")
 
 	// Get current span. The span was created within the gRPC interceptor.
-	// We are just adding data to it here.
+	// We are retrieving it here because we want to add data to it.
 	span := trace.SpanFromContext(ctx)
 
 	if in.Slow {
@@ -50,6 +50,7 @@ func (s *server) GetSeniority(ctx context.Context, in *pb.SeniorityRequest) (*pb
 	if in.Unreliable {
 		// Return an error 10% of the time.
 		if rand.Intn(10) == 0 {
+			// Mark the span as containing an error.
 			span.SetStatus(500, "Random error")
 			return nil, errors.New("random error")
 		}
@@ -57,6 +58,7 @@ func (s *server) GetSeniority(ctx context.Context, in *pb.SeniorityRequest) (*pb
 	}
 	selected := seniorities[rand.Intn(len(seniorities))]
 
+	// Log the result on the span.
 	span.AddEvent(ctx, "Selected seniority", key.New("seniority").String(selected))
 
 	return &pb.SeniorityReply{Seniority: selected}, nil
@@ -100,6 +102,7 @@ func main() {
 	jaegerHost := getenv("SENIORITY_JAEGER_HOST", "localhost")
 	jaegerPort := getenv("SENIORITY_JAEGER_PORT", "14268")
 
+	// Initialize tracing.
 	fn := initTraceProvider(jaegerHost, jaegerPort)
 	defer fn()
 
